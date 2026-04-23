@@ -1,0 +1,581 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Pure Air Guard - Mould Prevention API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: rooms
+    description: Room management
+  - name: readings
+    description: Sensor readings
+  - name: alerts
+    description: Alerts and notifications
+  - name: inspections
+    description: Inspection logs
+  - name: recommendations
+    description: Mould prevention recommendations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /rooms:
+    get:
+      operationId: getRooms
+      tags: [rooms]
+      summary: Get all rooms
+      responses:
+        "200":
+          description: List of rooms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Room"
+    post:
+      operationId: createRoom
+      tags: [rooms]
+      summary: Create a room
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRoom"
+      responses:
+        "201":
+          description: Room created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+
+  /rooms/{id}:
+    get:
+      operationId: getRoom
+      tags: [rooms]
+      summary: Get a room
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Room details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+        "404":
+          description: Room not found
+    put:
+      operationId: updateRoom
+      tags: [rooms]
+      summary: Update a room
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateRoom"
+      responses:
+        "200":
+          description: Room updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+    delete:
+      operationId: deleteRoom
+      tags: [rooms]
+      summary: Delete a room
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Room deleted
+
+  /readings:
+    get:
+      operationId: getReadings
+      tags: [readings]
+      summary: Get sensor readings
+      parameters:
+        - name: roomId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: List of readings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Reading"
+    post:
+      operationId: createReading
+      tags: [readings]
+      summary: Add a sensor reading
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReading"
+      responses:
+        "201":
+          description: Reading created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reading"
+
+  /readings/latest:
+    get:
+      operationId: getLatestReadings
+      tags: [readings]
+      summary: Get latest reading per room
+      responses:
+        "200":
+          description: Latest readings per room
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Reading"
+
+  /alerts:
+    get:
+      operationId: getAlerts
+      tags: [alerts]
+      summary: Get alerts
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [active, resolved, all]
+            default: active
+      responses:
+        "200":
+          description: List of alerts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Alert"
+
+  /alerts/{id}/resolve:
+    put:
+      operationId: resolveAlert
+      tags: [alerts]
+      summary: Resolve an alert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Alert resolved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Alert"
+
+  /inspections:
+    get:
+      operationId: getInspections
+      tags: [inspections]
+      summary: Get inspection logs
+      responses:
+        "200":
+          description: List of inspections
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Inspection"
+    post:
+      operationId: createInspection
+      tags: [inspections]
+      summary: Log an inspection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInspection"
+      responses:
+        "201":
+          description: Inspection logged
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Inspection"
+
+  /recommendations:
+    get:
+      operationId: getRecommendations
+      tags: [recommendations]
+      summary: Get mould prevention recommendations
+      responses:
+        "200":
+          description: List of recommendations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Recommendation"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [rooms]
+      summary: Get dashboard summary stats
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    Room:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        type:
+          type: string
+          enum: [bedroom, bathroom, kitchen, living_room, basement, attic, garage, other]
+        location:
+          type: string
+        mouldRiskLevel:
+          type: string
+          enum: [low, medium, high, critical]
+        notes:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - type
+        - location
+        - mouldRiskLevel
+        - createdAt
+
+    CreateRoom:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [bedroom, bathroom, kitchen, living_room, basement, attic, garage, other]
+        location:
+          type: string
+        notes:
+          type: string
+          nullable: true
+      required:
+        - name
+        - type
+        - location
+
+    UpdateRoom:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [bedroom, bathroom, kitchen, living_room, basement, attic, garage, other]
+        location:
+          type: string
+        notes:
+          type: string
+          nullable: true
+
+    Reading:
+      type: object
+      properties:
+        id:
+          type: integer
+        roomId:
+          type: integer
+        roomName:
+          type: string
+        humidity:
+          type: number
+          format: float
+        temperature:
+          type: number
+          format: float
+        co2:
+          type: number
+          format: float
+          nullable: true
+        vocLevel:
+          type: number
+          format: float
+          nullable: true
+        mouldRiskScore:
+          type: number
+          format: float
+        source:
+          type: string
+          enum: [manual, bluetooth, api]
+        recordedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - roomId
+        - roomName
+        - humidity
+        - temperature
+        - mouldRiskScore
+        - source
+        - recordedAt
+
+    CreateReading:
+      type: object
+      properties:
+        roomId:
+          type: integer
+        humidity:
+          type: number
+          format: float
+        temperature:
+          type: number
+          format: float
+        co2:
+          type: number
+          format: float
+          nullable: true
+        vocLevel:
+          type: number
+          format: float
+          nullable: true
+        source:
+          type: string
+          enum: [manual, bluetooth, api]
+          default: manual
+      required:
+        - roomId
+        - humidity
+        - temperature
+
+    Alert:
+      type: object
+      properties:
+        id:
+          type: integer
+        roomId:
+          type: integer
+        roomName:
+          type: string
+        type:
+          type: string
+          enum: [high_humidity, low_humidity, high_temperature, low_temperature, high_mould_risk, critical_mould_risk]
+        severity:
+          type: string
+          enum: [warning, danger, critical]
+        message:
+          type: string
+        status:
+          type: string
+          enum: [active, resolved]
+        createdAt:
+          type: string
+          format: date-time
+        resolvedAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - roomId
+        - roomName
+        - type
+        - severity
+        - message
+        - status
+        - createdAt
+
+    Inspection:
+      type: object
+      properties:
+        id:
+          type: integer
+        roomId:
+          type: integer
+        roomName:
+          type: string
+        inspector:
+          type: string
+        findings:
+          type: string
+        mouldFound:
+          type: boolean
+        mouldArea:
+          type: string
+          nullable: true
+        actionsTaken:
+          type: string
+          nullable: true
+        nextInspectionDate:
+          type: string
+          format: date
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - roomId
+        - roomName
+        - inspector
+        - findings
+        - mouldFound
+        - createdAt
+
+    CreateInspection:
+      type: object
+      properties:
+        roomId:
+          type: integer
+        inspector:
+          type: string
+        findings:
+          type: string
+        mouldFound:
+          type: boolean
+        mouldArea:
+          type: string
+          nullable: true
+        actionsTaken:
+          type: string
+          nullable: true
+        nextInspectionDate:
+          type: string
+          format: date
+          nullable: true
+      required:
+        - roomId
+        - inspector
+        - findings
+        - mouldFound
+
+    Recommendation:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+          enum: [ventilation, temperature, humidity, cleaning, structural, monitoring]
+        priority:
+          type: string
+          enum: [low, medium, high]
+        applicable:
+          type: boolean
+      required:
+        - id
+        - title
+        - description
+        - category
+        - priority
+        - applicable
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalRooms:
+          type: integer
+        activeAlerts:
+          type: integer
+        criticalRooms:
+          type: integer
+        avgHumidity:
+          type: number
+          format: float
+        avgTemperature:
+          type: number
+          format: float
+        avgMouldRisk:
+          type: number
+          format: float
+        lastUpdated:
+          type: string
+          format: date-time
+      required:
+        - totalRooms
+        - activeAlerts
+        - criticalRooms
+        - avgHumidity
+        - avgTemperature
+        - avgMouldRisk
+        - lastUpdated
