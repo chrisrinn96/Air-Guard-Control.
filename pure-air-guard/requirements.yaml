@@ -1,0 +1,18 @@
+packages:
+  "recharts": "For rendering data visualization charts on the dashboard"
+  "date-fns": "For formatting dates consistently across tables and cards"
+  "framer-motion": "For page transitions, smooth micro-interactions, and staggered list animations"
+  "lucide-react": "For beautiful, consistent iconography across the application"
+
+images:
+  - path: "artifacts/pure-air-guard/public/images/auth-bg.png"
+    description: "Clean, modern abstract background with soft teal, cyan, and white gradients, representing fresh air and purity, soft light leaks"
+    aspect_ratio: "16:9"
+  - path: "artifacts/pure-air-guard/public/images/empty-state.png"
+    description: "Minimalist 3D illustration of a clean, airy room with a subtle breeze, representing a healthy environment without mould"
+    aspect_ratio: "1:1"
+
+notes:
+  - App relies on generated API client from @workspace/api-client-react
+  - Forms use standard React state for robust compatibility
+  - Styling leans heavily on a custom teal/slate theme defined in index.css
